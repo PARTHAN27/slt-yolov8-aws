@@ -139,7 +139,7 @@
     </header>
 
     <section class="video-container">
-        <img id="video-feed" src="{{ url_for('webapp') }}" alt="Live Feed">
+        <img id="video-feed" src="{{ url_for('webapplication') }}" alt="Live Feed">
     </section>
 
     <div class="controls">
@@ -168,7 +168,7 @@
 
         // Start webcam function
         function startWebcam() {
-            document.getElementById('video-feed').src = "{{ url_for('webapp') }}";
+            document.getElementById('video-feed').src = "{{ url_for('webapplication') }}";
             detectSign();
         }
 
@@ -203,7 +203,7 @@
                     console.error("Error detecting sign:", error);
                     document.getElementById('loading-spinner').style.display = "none"; // Hide loading spinner
                 }
-            }, 2000); // Poll every 2 seconds
+            }, 5000); // Poll every 2 seconds
         }
 
         // Start audio function to begin continuous audio output

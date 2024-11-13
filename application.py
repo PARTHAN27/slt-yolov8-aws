@@ -11,9 +11,9 @@ import threading
 import time
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'amrutha'
-app.config['UPLOAD_FOLDER'] = 'static/files'
+application= Flask(__name__)
+application.config['SECRET_KEY'] = 'amrutha'
+application.config['UPLOAD_FOLDER'] = 'static/files'
 detection_sign=""
 
 class UploadFileForm(FlaskForm):
@@ -43,11 +43,11 @@ def generate_frames_web(path_x):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-@app.route('/', methods=['GET', 'POST'])
+@application.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('index.html')
 
-@app.route('/speak', methods=['POST'])
+@application.route('/speak', methods=['POST'])
 def speak():
     data = request.get_json()
     text = data.get('text', '')
@@ -56,7 +56,7 @@ def speak():
         threading.Thread(target=generate_speech, args=(text,)).start()
         return jsonify({"message": "Speech output generated"}), 200
 
-@app.route('/upload', methods=['POST'])
+@application.route('/upload', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
@@ -64,7 +64,7 @@ def upload_image():
     if file.filename == '':
         return jsonify({'error': 'No selected file'})
     filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
     predicted_sign, processed_image_path = image_detection(file_path)
     image_url = url_for('static', filename=f'files/{os.path.basename(processed_image_path)}')
@@ -73,24 +73,23 @@ def upload_image():
         'image_url': image_url
     })
 
-@app.route("/webcam", methods=['GET', 'POST'])
+@application.route("/webcam", methods=['GET', 'POST'])
 def webcam():
     session.clear()
     return render_template('ui.html')
 
-@app.route('/video')
+@application.route('/video')
 def video():
     return Response(generate_frames(path_x=session.get('video_path', None)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/webapp')
-def webapp():
+@application.route('/webapplication')
+def webapplication():
     return Response(generate_frames_web(path_x=0), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/detect_sign', methods=['GET'])
+@application.route('/detect_sign', methods=['GET'])
 def detect_sign():
     global detection_sign  
-    print(f"Sending sign: {detection_sign}") 
     return jsonify({'predicted_sign': detection_sign})
 
 if __name__ == "__main__":
-    app.run(debug=True,use_reloader=False)                  
+    application.run(debug=True,use_reloader=False)                  
