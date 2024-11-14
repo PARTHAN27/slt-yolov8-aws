@@ -76,7 +76,7 @@ def upload_image():
 @application.route("/webcam", methods=['GET', 'POST'])
 def webcam():
     session.clear()
-    return render_template('ui.html')
+    return render_template('livefeed.html')
 
 @application.route('/video')
 def video():
