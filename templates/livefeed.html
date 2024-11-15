@@ -167,9 +167,46 @@
         let audioActive = false; // Tracks if audio output is active
 
         // Start webcam function
-        function startWebcam() {
-            document.getElementById('video-feed').src = "{{ url_for('webapplication') }}";
-            detectSign();
+    // livefeed.html - Modified version
+    function startWebcam() {
+        const video = document.createElement('video');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+
+                // Process frames
+                setInterval(() => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0);
+                    
+                    // Convert frame to base64
+                    const imageData = canvas.toDataURL('image/jpeg');
+                    
+                    // Send to server
+                    fetch('/process_frame', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            image: imageData
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success && data.predicted_sign) {
+                            document.getElementById('detected-sign').textContent = 
+                                `Detected Sign: ${data.predicted_sign}`;
+                        }
+                    });
+                }, 100); // Process every 100ms
+            })
+            .catch(err => console.error("Error accessing webcam:", err));
         }
 
         // Stop webcam function

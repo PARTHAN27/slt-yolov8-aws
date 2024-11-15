@@ -9,6 +9,7 @@ import pyttsx3
 from wtforms import FileField, SubmitField,StringField,DecimalRangeField,IntegerRangeField
 import threading
 import time
+import base64
 
 
 application= Flask(__name__)
@@ -90,6 +91,29 @@ def webapplication():
 def detect_sign():
     global detection_sign  
     return jsonify({'predicted_sign': detection_sign})
+
+@application.route('/process_frame', methods=['POST'])
+def process_frame():
+    try:
+        # Get the image data from request
+        image_data = request.json['image']
+        # Convert base64 image to cv2 format
+        encoded_data = image_data.split(',')[1]
+        nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Process frame using your existing detection logic
+        predicted_sign = video_detection(img)
+        
+        return jsonify({
+            'success': True,
+            'predicted_sign': predicted_sign
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
 
 if __name__ == "__main__":
     application.run(debug=True,use_reloader=False)                  
