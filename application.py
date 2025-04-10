@@ -13,7 +13,7 @@ import base64
 
 
 application= Flask(__name__)
-application.config['SECRET_KEY'] = 'amrutha'
+application.config['SECRET_KEY'] = 'parthan'
 application.config['UPLOAD_FOLDER'] = 'static/files'
 detection_sign=""
 
